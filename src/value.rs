@@ -1,0 +1,88 @@
+use petgraph::{Graph, graph::NodeIndex};
+use std::ops::{Add, Mul};
+
+pub type MyGraph = Graph<String, String>;
+
+#[derive(Debug, Clone)]
+pub enum Operator {
+    Leaf,
+    Add,
+    Mul,
+}
+
+// FIXME: should encapsulate any scalar.
+#[derive(Debug, Clone)]
+pub struct Value {
+    pub data: f64,
+    children: Vec<Self>,
+    operator: Operator,
+}
+
+impl Value {
+    pub fn new(value: f64) -> Self {
+        Self {
+            data: value,
+            children: vec![],
+            operator: Operator::Leaf,
+        }
+    }
+}
+
+impl Add for Value {
+    type Output = Self;
+
+    fn add(self, rhs: Self) -> Self::Output {
+        Self {
+            data: self.data + rhs.data,
+            children: vec![self.clone(), rhs.clone()],
+            operator: Operator::Add,
+        }
+    }
+}
+
+impl Mul for Value {
+    type Output = Self;
+
+    fn mul(self, rhs: Self) -> Self::Output {
+        Self {
+            data: self.data * rhs.data,
+            children: vec![self.clone(), rhs.clone()],
+            operator: Operator::Mul,
+        }
+    }
+}
+
+impl Value {
+    pub fn draw(&self) -> MyGraph {
+        let graph = Graph::new();
+
+        self.edge(graph, None)
+    }
+
+    fn edge(&self, mut graph: MyGraph, parent: Option<NodeIndex>) -> MyGraph {
+        let node_data = graph.add_node(format!("data {:.4}", self.data));
+
+        let child_parent = match &self.operator {
+            Operator::Leaf => None,
+            operator => {
+                let node_operator = graph.add_node(format!("{operator:?}"));
+
+                graph.extend_with_edges(&[(node_data, node_operator)]);
+                Some(node_operator)
+            }
+        };
+
+        for child in &self.children {
+            graph = child.edge(graph, child_parent);
+        }
+
+        match parent {
+            Some(parent_index) => {
+                graph.extend_with_edges(&[(parent_index, node_data)]);
+            }
+            None => {}
+        }
+
+        graph
+    }
+}
