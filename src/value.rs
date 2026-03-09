@@ -1,5 +1,8 @@
 use petgraph::{Graph, graph::NodeIndex};
-use std::ops::{Add, Mul};
+use std::{
+    fmt::Display,
+    ops::{Add, Mul},
+};
 
 pub type MyGraph = Graph<String, String>;
 
@@ -8,6 +11,20 @@ pub enum Operator {
     Leaf,
     Add,
     Mul,
+}
+
+impl Display for Operator {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{}",
+            match self {
+                Operator::Leaf => "",
+                Operator::Add => "+",
+                Operator::Mul => "*",
+            }
+        )
+    }
 }
 
 // FIXME: should encapsulate any scalar.
@@ -65,7 +82,7 @@ impl Value {
         let child_parent = match &self.operator {
             Operator::Leaf => None,
             operator => {
-                let node_operator = graph.add_node(format!("{operator:?}"));
+                let node_operator = graph.add_node(operator.to_string());
 
                 graph.extend_with_edges(&[(node_data, node_operator)]);
                 Some(node_operator)
@@ -76,11 +93,8 @@ impl Value {
             graph = child.edge(graph, child_parent);
         }
 
-        match parent {
-            Some(parent_index) => {
-                graph.extend_with_edges(&[(parent_index, node_data)]);
-            }
-            None => {}
+        if let Some(parent_index) = parent {
+            graph.extend_with_edges(&[(parent_index, node_data)]);
         }
 
         graph
