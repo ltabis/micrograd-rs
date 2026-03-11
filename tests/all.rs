@@ -12,7 +12,11 @@ pub mod test_sandbox {
 
         assert_eq!(d.data, 4.0);
 
-        println!("{:?}", Dot::with_config(&d.draw(), &[Config::EdgeNoLabel]));
+        std::fs::write(
+            "test.dot",
+            format!("{}", Dot::with_config(&d.draw(), &[Config::EdgeNoLabel])),
+        )
+        .unwrap();
     }
 }
 
