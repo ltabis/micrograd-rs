@@ -14,7 +14,16 @@ pub mod test_sandbox {
 
         std::fs::write(
             "test.dot",
-            format!("{}", Dot::with_config(&d.draw(), &[Config::EdgeNoLabel])),
+            format!(
+                "{}",
+                Dot::with_config(
+                    &d.draw(),
+                    &[
+                        Config::EdgeNoLabel,
+                        Config::RankDir(petgraph::dot::RankDir::LR)
+                    ]
+                )
+            ),
         )
         .unwrap();
     }

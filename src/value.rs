@@ -84,7 +84,7 @@ impl Value {
             operator => {
                 let node_operator = graph.add_node(operator.to_string());
 
-                graph.extend_with_edges(&[(node_data, node_operator)]);
+                graph.extend_with_edges(&[(node_operator, node_data)]);
 
                 for child in &self.children {
                     graph = child.edge(graph, Some(node_operator));
@@ -93,7 +93,7 @@ impl Value {
         }
 
         if let Some(parent_index) = parent {
-            graph.extend_with_edges(&[(parent_index, node_data)]);
+            graph.extend_with_edges(&[(node_data, parent_index)]);
         }
 
         graph
