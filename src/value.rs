@@ -79,18 +79,17 @@ impl Value {
     fn edge(&self, mut graph: MyGraph, parent: Option<NodeIndex>) -> MyGraph {
         let node_data = graph.add_node(format!("data {:.4}", self.data));
 
-        let child_parent = match &self.operator {
-            Operator::Leaf => None,
+        match &self.operator {
+            Operator::Leaf => {}
             operator => {
                 let node_operator = graph.add_node(operator.to_string());
 
                 graph.extend_with_edges(&[(node_data, node_operator)]);
-                Some(node_operator)
-            }
-        };
 
-        for child in &self.children {
-            graph = child.edge(graph, child_parent);
+                for child in &self.children {
+                    graph = child.edge(graph, Some(node_operator));
+                }
+            }
         }
 
         if let Some(parent_index) = parent {
