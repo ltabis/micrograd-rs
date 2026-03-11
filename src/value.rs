@@ -31,14 +31,25 @@ impl Display for Operator {
 #[derive(Debug, Clone)]
 pub struct Value {
     pub data: f64,
+    pub label: Option<String>,
     children: Vec<Self>,
     operator: Operator,
 }
 
 impl Value {
-    pub fn new(value: f64) -> Self {
+    pub fn new(data: f64) -> Self {
         Self {
-            data: value,
+            data: data,
+            label: None,
+            children: vec![],
+            operator: Operator::Leaf,
+        }
+    }
+
+    pub fn new_with_label(data: f64, label: &str) -> Self {
+        Self {
+            data: data,
+            label: Some(label.to_string()),
             children: vec![],
             operator: Operator::Leaf,
         }
@@ -51,6 +62,7 @@ impl Add for Value {
     fn add(self, rhs: Self) -> Self::Output {
         Self {
             data: self.data + rhs.data,
+            label: None,
             children: vec![self.clone(), rhs.clone()],
             operator: Operator::Add,
         }
@@ -63,6 +75,7 @@ impl Mul for Value {
     fn mul(self, rhs: Self) -> Self::Output {
         Self {
             data: self.data * rhs.data,
+            label: None,
             children: vec![self.clone(), rhs.clone()],
             operator: Operator::Mul,
         }
@@ -77,7 +90,10 @@ impl Value {
     }
 
     fn edge(&self, mut graph: MyGraph, parent: Option<NodeIndex>) -> MyGraph {
-        let node_data = graph.add_node(format!("data {:.4}", self.data));
+        let node_data = graph.add_node(match &self.label {
+            Some(label) => format!("{label} | data {:.4}", self.data),
+            None => format!("data {:.4}", self.data),
+        });
 
         match &self.operator {
             Operator::Leaf => {}

@@ -5,9 +5,9 @@ pub mod test_sandbox {
     #[test]
 
     pub fn test_sandbox() {
-        let a = Value::new(2.0);
-        let b = Value::new(-3.0);
-        let c = Value::new(10.0);
+        let a = Value::new_with_label(2.0, "a");
+        let b = Value::new_with_label(-3.0, "b");
+        let c = Value::new_with_label(10.0, "c");
         let d = a * b + c;
 
         assert_eq!(d.data, 4.0);
